@@ -1,0 +1,88 @@
+---
+title: "Homework 3"
+author: "Lara Friedlund"
+date: "2/8/2019"
+output: html_document
+---
+```{r}
+library(tidyverse)
+```
+
+```{r}
+fisheries <- readr::read_csv(file = "FAO_1950to2012_111914.csv")
+```
+# 1: It seems that there are multiple columns named species. Also, the columns with 1950-2012 can be formatted better.
+
+# 2
+```{r}
+names(fisheries) = make.names(names(fisheries), unique=T)
+names(fisheries)
+```
+```{r}
+library(dplyr)
+```
+
+# 3
+```{r}
+fisheries<-
+fisheries %>% 
+  dplyr::rename(
+    country = Country..Country.,
+    commname = Species..ASFIS.species.,
+    sciname = Species..ASFIS.species._2,
+    spcode = Species..ASFIS.species._1,
+    spgroup = Species..ISSCAAP.group.,
+    spgroupname = Species..ISSCAAP.group._1,
+    region = Fishing.area..FAO.major.fishing.area.,
+    unit = Measure..Measure.)
+```
+
+# 4: The data is not tidy because variables (years) are being used as columns.
+
+# 5
+```{r}
+fisheries_tidy <- 
+  fisheries %>% 
+  gather(num_range('X',1950:2012), key='year', value='catch')
+fisheries_tidy
+```
+
+# 6: Both the year and catch columns are character class. There is missing/empty data in the catch column.
+```{r}
+glimpse(fisheries_tidy)
+```
+
+# 7
+```{r}
+fisheries_tidy <- 
+  fisheries_tidy %>% 
+  mutate(
+    year= as.numeric(str_replace(year, 'X', '')), 
+    catch= as.numeric(str_replace(catch, c(' F','...','-'), replacement = '')) 
+    )
+```
+
+# 8: Data is tidy because varliables are no longer columns
+
+# 9:
+
+```{r}
+fisheries_tidy %>% 
+  select(country, spgroupname, year, catch) %>%
+  filter(year>= 2008, year<=2012,
+    spgroupname=="Squids, cuttlefishes, octopuses") %>%
+  arrange(desc(catch))
+```
+# Peru, China, Vietnam, Japan, Taiwan Province of China
+
+# 10: France
+```{r}
+cuttle <- 
+  fisheries_tidy %>% 
+  select(country, commname, year, catch) %>% 
+  filter(year>=2008 & year<=2012) %>%
+  filter(commname=="Common cuttlefish") %>%
+  arrange(desc(catch))
+cuttle
+```
+
