@@ -1,0 +1,99 @@
+---
+title: "Homework 4"
+author: "Lara Friedlund"
+date: "2/15/2019"
+output: 
+  html_document: 
+    keep_md: yes
+---
+```{r}
+library(tidyverse)
+```
+```{r}
+life_history <- readr::read_csv("mammal_lifehistories_v2.csv")
+```
+```{r}
+life_history <- 
+  life_history %>% 
+  dplyr::rename(
+          genus        = Genus,
+          wean_mass    = `wean mass`,
+          max_life     = `max. life`,
+          litter_size  = `litter size`,
+          litters_yr   = `litters/year`
+          )
+life_history
+```
+
+#1
+```{r}
+library(skimr)
+```
+```{r}
+life_history %>% 
+  skimr::skim()
+```
+
+#2
+```{r}
+data(msleep)
+msleep
+```
+
+```{r}
+msleep %>% 
+  summarize(number_nas= sum(is.na(life_history)))
+```
+#There are 0 NA's in the data which is unlikely since the life history dataset is full of -999 which seems to be a replacement of an NA value. Side note: why pipe msleep?
+
+#3
+```{r}
+life_history <- 
+  life_history %>% 
+  na_if(-999.0)
+```
+
+```{r}
+life_history %>% 
+  skimr::skim()
+```
+
+```{r}
+life_history %>%
+  purrr::map_df(~ sum(is.na(.)))%>% 
+  tidyr::gather(variables, num_nas) %>% 
+  arrange(desc(num_nas))
+```
+#Wean mass has the most NA's (1039) followed by max_life, litters_yr, and weaning.
+
+#4
+```{r}
+life_history %>%
+  group_by(order) %>% 
+  summarize(n())
+```
+
+#5 (max life recorded in months according to metadata)
+```{r}
+life_history %>%
+  mutate(lifespan=max_life/12) %>% 
+  group_by(order) %>%
+  summarize(min=min(lifespan, na.rm=TRUE),
+            max=max(lifespan, na.rm=TRUE),
+            mean=mean(lifespan, na.rm=TRUE),
+            sd=sd(lifespan, na.rm=TRUE),
+            total=n())
+```
+
+#6
+```{r}
+life_history %>% 
+  group_by(order) %>% 
+  summarize(mean_gestation=mean(gestation, na.rm=TRUE),
+            mean_newborn_mass=mean(newborn, na.rm=TRUE),
+            mean_wean_mass=mean(wean_mass, na.rm=TRUE),
+            total=n()) %>% 
+  arrange(desc(mean_gestation))
+```
+
+
