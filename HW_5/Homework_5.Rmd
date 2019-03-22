@@ -1,0 +1,128 @@
+---
+title: "Homework 5"
+author: "Lara Friedlund"
+date: "March 22, 2019"
+output: 
+  html_document: 
+    fig_caption: yes
+    keep_md: yes
+---
+---
+title: "HW5"
+author: "Lara Friedlund"
+output: 
+  html_document: 
+    fig_caption: yes
+    keep_md: yes
+---
+##Mammals Life History
+
+#1 Load the data.
+```{r}
+library(tidyverse)
+```
+
+```{r}
+life_history <- readr::read_csv(file = "data/mammal_lifehistories_v2.csv")
+```
+
+
+#2 Use your preferred function to have a look. Do you notice any problems?
+```{r}
+library(skimr)
+```
+
+```{r}
+life_history %>%
+  skimr::skim()
+```
+
+
+#3 There are NA's. How are you going to deal with them?
+```{r}
+life_history <- life_history %>% 
+  na_if("-999")
+```
+
+```{r}
+life_history
+```
+
+
+#4 Where are the NA's? 
+```{r}
+life_history %>%
+  purrr::map_df(~ sum(is.na(.)))%>% 
+  tidyr::gather(variables, num_nas) %>% 
+  arrange(desc(num_nas))
+```
+
+
+#5 Some of the variable names will be problematic. Let's rename them here as a final tidy step.
+```{r}
+life_history <- life_history %>%
+  dplyr::rename(genus = "Genus", wean_mass = "wean mass", max_life = "max. life", litter_size = "litter size", litters_yr = "litters/year")
+```
+
+```{r}
+life_history
+```
+
+##Ggplot 
+
+```{r}
+options(scipen=999)
+```
+
+#6 What is the relationship between newborn body mass and gestation? Make a scatterplot that shows this relationship.
+```{r}
+life_history %>% 
+  ggplot(aes(x=newborn, y=gestation))+
+  geom_point()+
+  labs(title = "Newborn Body Mass vs. Gestation", x = "Newborn Mass", y = "Gestation")+ 
+  theme(plot.title = element_text(size = rel(1.5), hjust = 0.5))
+```
+
+
+#7 You should notice that because of the outliers in newborn mass, we need to make some changes. We didn't talk about this in lab, but you can use scale_x_log10() as a layer to correct for this issue. This will log transform the y-axis values.
+```{r}
+life_history %>%
+  ggplot(aes(x=newborn, y=gestation))+
+  geom_point()+
+  scale_x_log10()+
+  labs(title = "Newborn Body Mass vs. Gestation", x = "Newborn Mass", y = "Gestation")+
+  theme(plot.title = element_text(size = rel(1.5), hjust = 0.5))
+```
+
+#8 Now that you have the basic plot, color the points by taxonomic order.
+```{r}
+life_history %>%
+  ggplot(aes(x=newborn, y=gestation, color=order))+
+  geom_point()+
+  scale_x_log10()+
+  labs(title = "Newborn Body Mass vs. Gestation", x = "Newborn Mass", y = "Gestation")+
+  theme(plot.title = element_text(size = rel(1.5), hjust = 0.5))
+```
+
+
+#9 Lastly, make the size of the points proportional to body mass.
+```{r}
+life_history %>%
+  ggplot(aes(x=newborn, y=gestation, color=order, size=mass))+
+  geom_point()+
+  scale_x_log10()+
+  labs(title = "Newborn Body Mass vs. Gestation", x = "Newborn Mass", y = "Gestation")+
+  theme(plot.title = element_text(size = rel(1.5), hjust = 0.5))
+```
+
+
+#10 Make a plot that shows the range of lifespan by order.
+```{r}
+life_history %>% 
+  ggplot(aes(x=order, y=max_life, fill=order))+
+  geom_boxplot()+
+  coord_flip()+
+  scale_y_log10()+
+  labs(title = "Lifespan by Taxonomic Order", x = "Taxonomic Order", y = "Lifespan", fill="Taxonomic Order")
+```
+
