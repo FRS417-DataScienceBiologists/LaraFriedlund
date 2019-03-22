@@ -7,14 +7,7 @@ output:
     fig_caption: yes
     keep_md: yes
 ---
----
-title: "HW5"
-author: "Lara Friedlund"
-output: 
-  html_document: 
-    fig_caption: yes
-    keep_md: yes
----
+
 ##Mammals Life History
 
 #1 Load the data.
